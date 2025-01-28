@@ -5,31 +5,71 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <EditText
-        android:id="@+id/inputField1"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:hint="@string/config_dialog_id"
-        android:inputType="text" />
+        android:layout_height="match_parent">
 
-    <EditText
-        android:id="@+id/inputField2"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:hint="@string/config_dialog_server"
-        android:inputType="text" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
 
-    <EditText
-        android:id="@+id/inputField3"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:hint="@string/config_dialog_port"
-        android:inputType="number" />
+            <EditText
+                android:id="@+id/inputField1"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:maxLength="30"
+                android:hint="@string/config_dialog_id"
+                android:inputType="text" />
 
-    <EditText
-        android:id="@+id/inputField4"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:hint="@string/config_dialog_topic"
-        android:inputType="text" />
+            <EditText
+                android:id="@+id/inputField2"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:maxLength="30"
+                android:hint="@string/config_dialog_server"
+                android:inputType="text" />
+
+            <EditText
+                android:id="@+id/inputField3"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:maxLength="4"
+                android:hint="@string/config_dialog_port"
+                android:inputType="number" />
+
+            <EditText
+                android:id="@+id/inputField4"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:maxLength="30"
+                android:hint="@string/config_dialog_topic"
+                android:inputType="text" />
+
+            <LinearLayout
+                style="?android:attr/buttonBarStyle"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="end"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnDefaults"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/reset_to_defaults" />
+
+                <Button
+                    android:id="@+id/btnSave"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:text="@string/save" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+
 </LinearLayout>

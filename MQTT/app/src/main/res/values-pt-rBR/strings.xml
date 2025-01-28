@@ -13,4 +13,7 @@
     <string name="reset_to_defaults">Reset para padrão</string>
     <string name="using_default_values">Usando valores padrão</string>
     <string name="saved">Salvo</string>
+    <string name="save">Salvar</string>
+    <string name="connection_settings">Configurações da conexão</string>
+    <string name="connection_settings_message">Deixe vazio para usar os valores padrão</string>
 </resources>

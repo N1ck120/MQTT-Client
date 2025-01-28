@@ -4,7 +4,7 @@
     <string name="config_dialog_id">Default ID: ClientMQTT</string>
     <string name="config_dialog_server">Default Server: broker.hivemq.com</string>
     <string name="config_dialog_port">Default Port: 1883</string>
-    <string name="config_dialog_topic">Default Topic: Test</string>
+    <string name="config_dialog_topic">Default Topic: TestClientMQTT</string>
     <string name="topic">Topic</string>
     <string name="message">Message</string>
     <string name="send">Send</string>
@@ -13,4 +13,7 @@
     <string name="reset_to_defaults">Reset to Defaults</string>
     <string name="using_default_values">Using default values</string>
     <string name="saved">Saved</string>
+    <string name="save">Save</string>
+    <string name="connection_settings">Connection Settings</string>
+    <string name="connection_settings_message">Leave blank to use default values</string>
 </resources>

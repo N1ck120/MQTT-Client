@@ -29,23 +29,19 @@ class MainActivity : AppCompatActivity() {
             insets
         }
         SharedPreferencesManager.init(this)
-        val sendmsg = findViewById<Button>(R.id.button)
-        val submsg = findViewById<TextView>(R.id.subpayload)
-        val ed1 = findViewById<EditText>(R.id.topic)
-        val ed2 = findViewById<EditText>(R.id.msg)
-        val setting = findViewById<ImageButton>(R.id.settings)
+        val btnSend = findViewById<Button>(R.id.button)
+        val receivedMessages = findViewById<TextView>(R.id.subpayload)
+        val fieldTopic = findViewById<EditText>(R.id.topic)
+        val fieldMessage = findViewById<EditText>(R.id.msg)
+        val btnSettings = findViewById<ImageButton>(R.id.settings)
 
         fun showInputDialog() {
-            // Infla o layout do diálogo personalizado
             val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_input, null)
-            val builder = AlertDialog.Builder(this)
-
-            // Configura o layout personalizado no diálogo
-            builder.setView(dialogView)
-
-            // Configuração do diálogo
-            builder.setTitle("Connection Settings")
-            builder.setMessage("Leave blank to use default values")
+            val dialog = AlertDialog.Builder(this)
+                .setTitle(getString(R.string.connection_settings))
+                .setMessage(getString(R.string.connection_settings_message))
+                .setView(dialogView)
+                .create() // Cria o diálogo sem botões padrão
 
             // Referências às caixas de texto no layout
             val inputField1: EditText = dialogView.findViewById(R.id.inputField1)
@@ -53,132 +49,142 @@ class MainActivity : AppCompatActivity() {
             val inputField3: EditText = dialogView.findViewById(R.id.inputField3)
             val inputField4: EditText = dialogView.findViewById(R.id.inputField4)
 
-            if (SharedPreferencesManager.chaveExiste("IdClient")){
-                inputField1.setText(SharedPreferencesManager.obterString("IdClient").toString())
+            // Referências aos botões do layout
+            val defaultsOption: Button = dialogView.findViewById(R.id.btnDefaults)
+            val saveOption: Button = dialogView.findViewById(R.id.btnSave)
+
+            if (SharedPreferencesManager.keyExists("IdClient")){
+                inputField1.setText(SharedPreferencesManager.getString("IdClient").toString())
             }
-            if (SharedPreferencesManager.chaveExiste("Server")){
-                inputField2.setText(SharedPreferencesManager.obterString("Server").toString())
+            if (SharedPreferencesManager.keyExists("Server")){
+                inputField2.setText(SharedPreferencesManager.getString("Server").toString())
             }
-            if (SharedPreferencesManager.chaveExiste("Port")){
-                inputField3.setText(SharedPreferencesManager.obterString("Port").toString())
+            if (SharedPreferencesManager.keyExists("Port")){
+                inputField3.setText(SharedPreferencesManager.getString("Port").toString())
             }
-            if (SharedPreferencesManager.chaveExiste("Topic")){
-                inputField4.setText(SharedPreferencesManager.obterString("Topic").toString())
+            if (SharedPreferencesManager.keyExists("Topic")){
+                inputField4.setText(SharedPreferencesManager.getString("Topic").toString())
             }
 
-            // Botões do diálogo
-            builder.setPositiveButton("Save") { _, _ ->
+            // Configura os listeners dos botões
+            saveOption.setOnClickListener {
                 // Captura os valores digitados
                 if (inputField1.text.isNotBlank()){
-                    SharedPreferencesManager.salvarString("IdClient", inputField1.text.toString())
+                    SharedPreferencesManager.saveString("IdClient", inputField1.text.toString())
                 }else{
-                    SharedPreferencesManager.removerChave("IdClient")
+                    SharedPreferencesManager.removeKey("IdClient")
                 }
                 if (inputField2.text.isNotBlank()){
-                    SharedPreferencesManager.salvarString("Server", inputField2.text.toString())
+                    SharedPreferencesManager.saveString("Server", inputField2.text.toString())
                 }else{
-                    SharedPreferencesManager.removerChave("Server")
+                    SharedPreferencesManager.removeKey("Server")
                 }
                 if (inputField3.text.isNotBlank()){
-                    SharedPreferencesManager.salvarString("Port", inputField3.text.toString())
+                    SharedPreferencesManager.saveString("Port", inputField3.text.toString())
                 }else{
-                    SharedPreferencesManager.removerChave("Port")
+                    SharedPreferencesManager.removeKey("Port")
                 }
                 if (inputField4.text.isNotBlank()){
-                    SharedPreferencesManager.salvarString("Topic", inputField4.text.toString())
+                    SharedPreferencesManager.saveString("Topic", inputField4.text.toString())
                 }else{
-                    SharedPreferencesManager.removerChave("Topic")
+                    SharedPreferencesManager.removeKey("Topic")
                 }
                 // Mostra as informações capturadas (ou faça algo com elas)
-                SharedPreferencesManager.salvarString("Popup", "1")
+                SharedPreferencesManager.saveString("popupAlreadyShown", "1")
                 Toast.makeText(this, getString(R.string.saved), Toast.LENGTH_SHORT).show()
                 val intent = intent // Recupera o Intent atual
                 finish() // Finaliza a Activity
                 startActivity(intent) // Inicia uma nova instância da mesma Activity
+                dialog.dismiss()
             }
-            builder.setNegativeButton(getString(R.string.reset_to_defaults)) { dialog, _ ->
+
+            defaultsOption.setOnClickListener {
                 Toast.makeText(this, getString(R.string.using_default_values), Toast.LENGTH_SHORT).show()
-                SharedPreferencesManager.limparTudo()
-                SharedPreferencesManager.salvarString("Popup", "1")
-                dialog.dismiss() // Fecha o diálogo
+                SharedPreferencesManager.clearAllData()
+                SharedPreferencesManager.saveString("popupAlreadyShown", "1")
+                val intent = intent // Recupera o Intent atual
+                finish() // Finaliza a Activity
+                startActivity(intent) // Inicia uma nova instância da mesma Activity
+                dialog.dismiss()
             }
-            // Exibe o diálogo
-            builder.create().show()
+            dialog.show()
         }
 
         val client = MqttClient.builder()
             .useMqttVersion3()
-            .identifier(SharedPreferencesManager.obterString("IdClient", "ClientMQTT").toString())
-            .serverHost(SharedPreferencesManager.obterString("Server", "broker.hivemq.com").toString())
-            .serverPort(SharedPreferencesManager.obterString("Port", "1883").toString().toInt())
+            .identifier(SharedPreferencesManager.getString("IdClient", "ClientMQTT").toString())
+            .serverHost(SharedPreferencesManager.getString("Server", "broker.hivemq.com").toString())
+            .serverPort(SharedPreferencesManager.getString("Port", "1883").toString().toInt())
             .buildAsync()
 
         // Conectando ao broker MQTT
         client.connectWith()
             .send()
-            .whenComplete { connAck: Mqtt3ConnAck?, throwable: Throwable? ->
+            .whenComplete { _: Mqtt3ConnAck?, throwable: Throwable? ->
                 if (throwable != null) {
                     // Log de erro ao conectar
                     throwable.printStackTrace()
                 } else {
                     // Log de sucesso na conexão
-                    println("Conectado ao broker MQTT!")
+                    println("Connected to the Broker!")
                 }
             }
 
         // Inscrevendo no tópico
             client.subscribeWith()
-                .topicFilter(SharedPreferencesManager.obterString("Topic", "Test").toString())
+                .topicFilter(SharedPreferencesManager.getString("Topic", "TestClientMQTT").toString())
                 .callback { publish: Mqtt3Publish? ->
                     if (publish != null) {
                         // Capturar a payload da mensagem recebida
                         runOnUiThread {
-                            submsg.text = (String(publish.payloadAsBytes)+"\n") + submsg.text
+                            receivedMessages.text = (String(publish.payloadAsBytes)+"\n") + receivedMessages.text
                         }
                     }
                 }
                 .send()
-                .whenComplete { subAck: Mqtt3SubAck?, throwable: Throwable? ->
+                .whenComplete { _: Mqtt3SubAck?, throwable: Throwable? ->
                     if (throwable != null) {
                         // Handle failure to subscribe
+                        throwable.printStackTrace()
                     } else {
                         // Handle successful subscription, e.g. logging or incrementing a metric
+                        println("Subscribed to the topic!")
                     }
                 }
 
         // Função para envio de informações
-        fun pubmsg(Topico : String = "Test", Payload : String = "Hello World"){
+        fun pubmsg(topic : String, payload : String){
             client.publishWith()
-                .topic(Topico)
-                .payload(Payload.toByteArray())
+                .topic(topic)
+                .payload(payload.toByteArray())
                 .send()
-                .whenComplete { publish: Mqtt3Publish?, throwable: Throwable? ->
+                .whenComplete { _: Mqtt3Publish?, throwable: Throwable? ->
                     if (throwable != null) {
                         // Log de erro ao publicar
                         throwable.printStackTrace()
                     } else {
                         // Log de sucesso na publicação
-                        println("Mensagem publicada com sucesso!")
+                        println("Message published successfully!")
                     }
                 }
         }
 
-        if (!SharedPreferencesManager.chaveExiste("Popup")){
+        if (!SharedPreferencesManager.keyExists("popupAlreadyShown")){
             showInputDialog()
         }
 
-        setting.setOnClickListener {
+        btnSettings.setOnClickListener {
             showInputDialog()
         }
 
-        sendmsg.setOnClickListener {
-            if (ed1.text.isBlank()){
-                ed1.error = getString(R.string.topic_can_t_be_blank)
+        btnSend.setOnClickListener {
+            if (fieldTopic.text.isBlank()){
+                fieldTopic.error = getString(R.string.topic_can_t_be_blank)
             }else{
-                if (ed2.text.isBlank()){
-                    ed2.error = getString(R.string.message_can_t_be_blank)
+                if (fieldMessage.text.isBlank()){
+                    fieldMessage.error = getString(R.string.message_can_t_be_blank)
                 }else{
-                    pubmsg(ed1.text.toString(), ed2.text.toString())
+                    pubmsg(fieldTopic.text.toString(), fieldMessage.text.toString())
                 }
             }
         }
