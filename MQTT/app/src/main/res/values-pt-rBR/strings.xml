@@ -4,7 +4,7 @@
     <string name="config_dialog_id">ID Padrão: ClientMQTT</string>
     <string name="config_dialog_server">Servidor Padrão: broker.hivemq.com</string>
     <string name="config_dialog_port">Porta Padrão: 1883</string>
-    <string name="config_dialog_topic">Tópico Padrão: Test</string>
+    <string name="config_dialog_topic">Tópico Padrão: TestClientMQTT</string>
     <string name="topic">Tópico</string>
     <string name="message">Mensagem</string>
     <string name="send">Enviar</string>
