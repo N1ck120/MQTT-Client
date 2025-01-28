@@ -9,27 +9,27 @@
         android:id="@+id/inputField1"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:hint="ID(Default: Random)"
+        android:hint="@string/config_dialog_id"
         android:inputType="text" />
 
     <EditText
         android:id="@+id/inputField2"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:hint="Server(Default: broker.hivemq.com)"
+        android:hint="@string/config_dialog_server"
         android:inputType="text" />
 
     <EditText
         android:id="@+id/inputField3"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:hint="Port(Default: 1883)"
+        android:hint="@string/config_dialog_port"
         android:inputType="number" />
 
     <EditText
         android:id="@+id/inputField4"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:hint="Topic(Default: Test)"
+        android:hint="@string/config_dialog_topic"
         android:inputType="text" />
 </LinearLayout>

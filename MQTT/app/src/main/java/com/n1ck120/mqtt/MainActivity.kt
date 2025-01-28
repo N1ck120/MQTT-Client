@@ -91,13 +91,13 @@ class MainActivity : AppCompatActivity() {
                 }
                 // Mostra as informações capturadas (ou faça algo com elas)
                 SharedPreferencesManager.salvarString("Popup", "1")
-                Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.saved), Toast.LENGTH_SHORT).show()
                 val intent = intent // Recupera o Intent atual
                 finish() // Finaliza a Activity
                 startActivity(intent) // Inicia uma nova instância da mesma Activity
             }
-            builder.setNegativeButton("Reset to Defaults") { dialog, _ ->
-                Toast.makeText(this, "Using default values", Toast.LENGTH_SHORT).show()
+            builder.setNegativeButton(getString(R.string.reset_to_defaults)) { dialog, _ ->
+                Toast.makeText(this, getString(R.string.using_default_values), Toast.LENGTH_SHORT).show()
                 SharedPreferencesManager.limparTudo()
                 SharedPreferencesManager.salvarString("Popup", "1")
                 dialog.dismiss() // Fecha o diálogo
@@ -108,7 +108,7 @@ class MainActivity : AppCompatActivity() {
 
         val client = MqttClient.builder()
             .useMqttVersion3()
-            .identifier(SharedPreferencesManager.obterString("IdClient", "ClienteMQTT").toString())
+            .identifier(SharedPreferencesManager.obterString("IdClient", "ClientMQTT").toString())
             .serverHost(SharedPreferencesManager.obterString("Server", "broker.hivemq.com").toString())
             .serverPort(SharedPreferencesManager.obterString("Port", "1883").toString().toInt())
             .buildAsync()
@@ -128,12 +128,12 @@ class MainActivity : AppCompatActivity() {
 
         // Inscrevendo no tópico
             client.subscribeWith()
-                .topicFilter(SharedPreferencesManager.obterString("Topic", "Teste").toString())
+                .topicFilter(SharedPreferencesManager.obterString("Topic", "Test").toString())
                 .callback { publish: Mqtt3Publish? ->
                     if (publish != null) {
                         // Capturar a payload da mensagem recebida
                         runOnUiThread {
-                            submsg.text = (String(publish.payloadAsBytes)+"\n") +  submsg.text
+                            submsg.text = (String(publish.payloadAsBytes)+"\n") + submsg.text
                         }
                     }
                 }
@@ -147,7 +147,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
         // Função para envio de informações
-        fun pubmsg(Topico : String = "Teste", Payload : String = "Hello World"){
+        fun pubmsg(Topico : String = "Test", Payload : String = "Hello World"){
             client.publishWith()
                 .topic(Topico)
                 .payload(Payload.toByteArray())
@@ -173,10 +173,10 @@ class MainActivity : AppCompatActivity() {
 
         sendmsg.setOnClickListener {
             if (ed1.text.isBlank()){
-                ed1.error = "Topic can´t be blank"
+                ed1.error = getString(R.string.topic_can_t_be_blank)
             }else{
                 if (ed2.text.isBlank()){
-                    ed2.error = "Message can´t be blank"
+                    ed2.error = getString(R.string.message_can_t_be_blank)
                 }else{
                     pubmsg(ed1.text.toString(), ed2.text.toString())
                 }

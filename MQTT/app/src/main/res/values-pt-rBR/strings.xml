@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MQTT</string>
+    <string name="config_dialog_id">ID Padrão: ClientMQTT</string>
+    <string name="config_dialog_server">Servidor Padrão: broker.hivemq.com</string>
+    <string name="config_dialog_port">Porta Padrão: 1883</string>
+    <string name="config_dialog_topic">Tópico Padrão: Test</string>
+    <string name="topic">Tópico</string>
+    <string name="message">Mensagem</string>
+    <string name="send">Enviar</string>
+    <string name="message_can_t_be_blank">A mensagem não pode ser vazia</string>
+    <string name="topic_can_t_be_blank">O tópico não pode ser vazio</string>
+    <string name="reset_to_defaults">Reset para padrão</string>
+    <string name="using_default_values">Usando valores padrão</string>
+    <string name="saved">Salvo</string>
+</resources>

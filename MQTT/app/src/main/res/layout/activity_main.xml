@@ -34,7 +34,7 @@
             android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:ems="10"
-            android:hint="Topic"
+            android:hint="@string/topic"
             android:inputType="text" />
 
         <EditText
@@ -42,14 +42,14 @@
             android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:ems="10"
-            android:hint="Message"
+            android:hint="@string/message"
             android:inputType="text" />
 
         <Button
             android:id="@+id/button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Send" />
+            android:text="@string/send" />
 
         <ScrollView
             android:id="@+id/scrollView2"

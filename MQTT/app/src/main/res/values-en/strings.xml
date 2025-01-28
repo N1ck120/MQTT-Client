@@ -1,9 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">MQTT</string>
     <string name="config_dialog_id">Default ID: ClientMQTT</string>
+    <string name="config_dialog_server">Default Server: broker.hivemq.com</string>
     <string name="config_dialog_port">Default Port: 1883</string>
     <string name="config_dialog_topic">Default Topic: Test</string>
-    <string name="config_dialog_server">Default Server: broker.hivemq.com</string>
     <string name="topic">Topic</string>
     <string name="message">Message</string>
     <string name="send">Send</string>
