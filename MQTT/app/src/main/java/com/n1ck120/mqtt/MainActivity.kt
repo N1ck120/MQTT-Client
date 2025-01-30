@@ -1,5 +1,7 @@
 package com.n1ck120.mqtt
 
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.widget.Button
@@ -10,8 +12,10 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.android.material.switchmaterial.SwitchMaterial
 import com.hivemq.client.mqtt.MqttClient
 import com.hivemq.client.mqtt.mqtt3.message.connect.connack.Mqtt3ConnAck
 import com.hivemq.client.mqtt.mqtt3.message.publish.Mqtt3Publish
@@ -34,6 +38,9 @@ class MainActivity : AppCompatActivity() {
         val fieldTopic = findViewById<EditText>(R.id.topic)
         val fieldMessage = findViewById<EditText>(R.id.msg)
         val btnSettings = findViewById<ImageButton>(R.id.settings)
+        val switch = findViewById<SwitchMaterial>(R.id.switch1)
+        val clear = findViewById<Button>(R.id.button2)
+        val switchtxt = findViewById<TextView>(R.id.textView)
 
         fun showInputDialog() {
             val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_input, null)
@@ -137,7 +144,9 @@ class MainActivity : AppCompatActivity() {
                     if (publish != null) {
                         // Capturar a payload da mensagem recebida
                         runOnUiThread {
-                            receivedMessages.text = (String(publish.payloadAsBytes)+"\n") + receivedMessages.text
+                            if (switch.isChecked){
+                                    receivedMessages.text = String(publish.payloadAsBytes) + "\n" + receivedMessages.text
+                            }
                         }
                     }
                 }
@@ -175,6 +184,23 @@ class MainActivity : AppCompatActivity() {
 
         btnSettings.setOnClickListener {
             showInputDialog()
+        }
+
+        clear.setOnClickListener {
+            receivedMessages.text = ""
+
+        }
+
+        switch.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked){
+                switchtxt.text = getString(R.string.play)
+                switch.thumbTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primary))
+                switch.trackTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.secondary))
+            }else{
+                switchtxt.text = getString(R.string.pause)
+                switch.thumbTintList = ColorStateList.valueOf(Color.parseColor("#B6B6B6"))
+                switch.trackTintList = ColorStateList.valueOf(Color.parseColor("#575757"))
+            }
         }
 
         btnSend.setOnClickListener {

@@ -15,4 +15,7 @@
     <string name="save">Save</string>
     <string name="connection_settings">Connection Settings</string>
     <string name="connection_settings_message">Leave blank to use default values</string>
+    <string name="clear">Clear</string>
+    <string name="pause">Pause</string>
+    <string name="play">Play</string>
 </resources>

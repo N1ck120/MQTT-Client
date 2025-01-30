@@ -16,4 +16,7 @@
     <string name="save">Salvar</string>
     <string name="connection_settings">Configurações da conexão</string>
     <string name="connection_settings_message">Deixe vazio para usar os valores padrão</string>
+    <string name="clear">Limpar</string>
+    <string name="pause">Pausar</string>
+    <string name="play">Receber</string>
 </resources>
