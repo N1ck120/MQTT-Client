@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.hivemq.client.mqtt.MqttClient
 import com.hivemq.client.mqtt.mqtt3.message.connect.connack.Mqtt3ConnAck
@@ -38,15 +39,32 @@ class MainActivity : AppCompatActivity() {
         val fieldTopic = findViewById<EditText>(R.id.topic)
         val fieldMessage = findViewById<EditText>(R.id.msg)
         val btnSettings = findViewById<ImageButton>(R.id.settings)
-        val switch = findViewById<SwitchMaterial>(R.id.switch1)
-        val clear = findViewById<Button>(R.id.button2)
-        val switchtxt = findViewById<TextView>(R.id.textView)
+        val clear = findViewById<FloatingActionButton>(R.id.clearbtn)
+        val pause = findViewById<FloatingActionButton>(R.id.pausebtn)
+
+        var isToggled = false
+
+        fun updateButtonAppearance() {
+            if (isToggled) {
+                pause.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primary))
+                pause.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.round_play_circle_outline_24))
+            } else {
+                pause.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#FF0500"))
+                pause.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.rounded_pause_circle_24))
+            }
+        }
+
+
+        pause.setOnClickListener {
+            isToggled = !isToggled
+            updateButtonAppearance()
+        }
+
+
 
         fun showInputDialog() {
             val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_input, null)
             val dialog = AlertDialog.Builder(this)
-                .setTitle(getString(R.string.connection_settings))
-                .setMessage(getString(R.string.connection_settings_message))
                 .setView(dialogView)
                 .create() // Cria o diálogo sem botões padrão
 
@@ -144,7 +162,7 @@ class MainActivity : AppCompatActivity() {
                     if (publish != null) {
                         // Capturar a payload da mensagem recebida
                         runOnUiThread {
-                            if (switch.isChecked){
+                            if (isToggled){
                                     receivedMessages.text = String(publish.payloadAsBytes) + "\n" + receivedMessages.text
                             }
                         }
@@ -189,18 +207,6 @@ class MainActivity : AppCompatActivity() {
         clear.setOnClickListener {
             receivedMessages.text = ""
 
-        }
-
-        switch.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked){
-                switchtxt.text = getString(R.string.play)
-                switch.thumbTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primary))
-                switch.trackTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.secondary))
-            }else{
-                switchtxt.text = getString(R.string.pause)
-                switch.thumbTintList = ColorStateList.valueOf(Color.parseColor("#B6B6B6"))
-                switch.trackTintList = ColorStateList.valueOf(Color.parseColor("#575757"))
-            }
         }
 
         btnSend.setOnClickListener {
