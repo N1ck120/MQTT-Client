@@ -16,6 +16,7 @@
 
         <EditText
             android:id="@+id/topic"
+            android:enabled="false"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:ems="10"
@@ -28,6 +29,7 @@
 
         <EditText
             android:id="@+id/msg"
+            android:enabled="false"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:ems="10"
@@ -38,9 +40,11 @@
 
         <Button
             android:id="@+id/button"
+            android:enabled="false"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/send"
+            style="@style/ButtonTheme"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/msg" />
@@ -54,6 +58,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/round_settings_24"
             tools:ignore="SpeakableTextPresentCheck" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -76,11 +81,26 @@
                     android:id="@+id/subpayload"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginEnd="20dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
                     android:textColor="#FFFFFF"
                     android:textIsSelectable="true"
                     tools:ignore="SpeakableTextPresentCheck" />
+
+                <ProgressBar
+                    android:id="@+id/progressBar"
+                    style="?android:attr/progressBarStyle"
+                    android:layout_width="55dp"
+                    android:layout_height="55dp"
+                    android:layout_gravity="center" />
+
+                <TextView
+                    android:id="@+id/wait"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="@string/connecting"
+                    android:textSize="20sp" />
 
                 <Space
                     android:layout_width="match_parent"
@@ -95,7 +115,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:clickable="true"
-            android:backgroundTint="@color/primary"
+            android:contentDescription="Clear"
+            style="@style/ButtonTheme"
             android:layout_marginEnd="15dp"
             android:layout_marginBottom="15dp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -109,10 +130,11 @@
             android:layout_marginEnd="15dp"
             android:layout_marginBottom="15dp"
             android:clickable="true"
-            android:backgroundTint="@color/primary"
+            android:contentDescription="Play/Pause"
+            style="@style/PauseButtonTheme"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:srcCompat="@drawable/rounded_pause_circle_24" />
+            app:srcCompat="@drawable/round_play_circle_outline_24" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -1,12 +1,13 @@
 package com.n1ck120.mqtt
 
-import android.content.res.ColorStateList
-import android.graphics.Color
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -16,11 +17,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.switchmaterial.SwitchMaterial
-import com.hivemq.client.mqtt.MqttClient
-import com.hivemq.client.mqtt.mqtt3.message.connect.connack.Mqtt3ConnAck
-import com.hivemq.client.mqtt.mqtt3.message.publish.Mqtt3Publish
-import com.hivemq.client.mqtt.mqtt3.message.subscribe.suback.Mqtt3SubAck
 
 class MainActivity : AppCompatActivity() {
 
@@ -33,34 +29,93 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
         SharedPreferencesManager.init(this)
         val btnSend = findViewById<Button>(R.id.button)
-        val receivedMessages = findViewById<TextView>(R.id.subpayload)
-        val fieldTopic = findViewById<EditText>(R.id.topic)
-        val fieldMessage = findViewById<EditText>(R.id.msg)
         val btnSettings = findViewById<ImageButton>(R.id.settings)
         val clear = findViewById<FloatingActionButton>(R.id.clearbtn)
+        val fieldMessage = findViewById<EditText>(R.id.msg)
+        val fieldTopic = findViewById<EditText>(R.id.topic)
         val pause = findViewById<FloatingActionButton>(R.id.pausebtn)
-
+        val receivedMessages = findViewById<TextView>(R.id.subpayload)
+        val wait = findViewById<TextView>(R.id.wait)
+        val progress = findViewById<ProgressBar>(R.id.progressBar)
         var isToggled = false
 
+        val mqtt = MQTTConnection(SharedPreferencesManager.getString("IdClient", "ClientMQTT").toString(), SharedPreferencesManager.getString("Server", "broker.hivemq.com").toString(), SharedPreferencesManager.getString("Port", "1883").toString().toInt())
+        mqtt.setCallbacks(object : MQTTConnection.MQTTCallbacks {
+            override fun onConnected() {
+                runOnUiThread {
+                    btnSend.isEnabled = true
+                    fieldTopic.isEnabled = true
+                    fieldMessage.isEnabled = true
+                    wait.visibility = View.GONE
+                    progress.visibility = View.GONE
+
+                    Toast.makeText(this@MainActivity, "Conectado!", Toast.LENGTH_SHORT).show()
+                    mqtt.subscribe(SharedPreferencesManager.getString("Topic", "TestClientMQTT").toString())
+
+                    btnSend.setOnClickListener {
+                        if (fieldTopic.text.isBlank()){
+                            fieldTopic.error = getString(R.string.topic_can_t_be_blank)
+                        }else{
+                            if (fieldMessage.text.isBlank()){
+                                fieldMessage.error = getString(R.string.message_can_t_be_blank)
+                            }else{
+                                mqtt.publish(fieldTopic.text.toString(), fieldMessage.text.toString())
+                            }
+                        }
+                    }
+                }
+            }
+
+            override fun onConnectionFailed(throwable: Throwable) {
+                Toast.makeText(this@MainActivity, "Falha na conexão!", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onMessageReceived(topic: String, payload: String) {
+                runOnUiThread {
+                    if (isToggled){
+                        receivedMessages.text = payload + "\n" + receivedMessages.text
+                    }
+                }
+            }
+
+            override fun onSubscribed() {
+                //Toast.makeText(this@MainActivity, "Inscrito com sucesso!", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onSubscribeFailed(throwable: Throwable) {
+                //Toast.makeText(this@MainActivity, "Falha na inscrição!", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onMessagePublished() {
+                //Toast.makeText(this@MainActivity, "Mensagem enviada!", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onPublishFailed(throwable: Throwable) {
+                //Toast.makeText(this@MainActivity, "Falha no envio da mensagem!", Toast.LENGTH_SHORT).show()
+            }
+
+            // Implementar outros callbacks conforme necessário
+
+        })
+
+        mqtt.connect()
+
+        //Lógica do Botão pause
         fun updateButtonAppearance() {
             if (isToggled) {
-                pause.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primary))
-                pause.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.round_play_circle_outline_24))
-            } else {
-                pause.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#FF0500"))
                 pause.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.rounded_pause_circle_24))
+            } else {
+                pause.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.round_play_circle_outline_24))
             }
         }
-
 
         pause.setOnClickListener {
             isToggled = !isToggled
             updateButtonAppearance()
         }
-
-
 
         fun showInputDialog() {
             val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_input, null)
@@ -135,67 +190,6 @@ class MainActivity : AppCompatActivity() {
             dialog.show()
         }
 
-        val client = MqttClient.builder()
-            .useMqttVersion3()
-            .identifier(SharedPreferencesManager.getString("IdClient", "ClientMQTT").toString())
-            .serverHost(SharedPreferencesManager.getString("Server", "broker.hivemq.com").toString())
-            .serverPort(SharedPreferencesManager.getString("Port", "1883").toString().toInt())
-            .buildAsync()
-
-        // Conectando ao broker MQTT
-        client.connectWith()
-            .send()
-            .whenComplete { _: Mqtt3ConnAck?, throwable: Throwable? ->
-                if (throwable != null) {
-                    // Log de erro ao conectar
-                    throwable.printStackTrace()
-                } else {
-                    // Log de sucesso na conexão
-                    println("Connected to the Broker!")
-                }
-            }
-
-        // Inscrevendo no tópico
-            client.subscribeWith()
-                .topicFilter(SharedPreferencesManager.getString("Topic", "TestClientMQTT").toString())
-                .callback { publish: Mqtt3Publish? ->
-                    if (publish != null) {
-                        // Capturar a payload da mensagem recebida
-                        runOnUiThread {
-                            if (isToggled){
-                                    receivedMessages.text = String(publish.payloadAsBytes) + "\n" + receivedMessages.text
-                            }
-                        }
-                    }
-                }
-                .send()
-                .whenComplete { _: Mqtt3SubAck?, throwable: Throwable? ->
-                    if (throwable != null) {
-                        // Handle failure to subscribe
-                        throwable.printStackTrace()
-                    } else {
-                        // Handle successful subscription, e.g. logging or incrementing a metric
-                        println("Subscribed to the topic!")
-                    }
-                }
-
-        // Função para envio de informações
-        fun pubmsg(topic : String, payload : String){
-            client.publishWith()
-                .topic(topic)
-                .payload(payload.toByteArray())
-                .send()
-                .whenComplete { _: Mqtt3Publish?, throwable: Throwable? ->
-                    if (throwable != null) {
-                        // Log de erro ao publicar
-                        throwable.printStackTrace()
-                    } else {
-                        // Log de sucesso na publicação
-                        println("Message published successfully!")
-                    }
-                }
-        }
-
         if (!SharedPreferencesManager.keyExists("popupAlreadyShown")){
             showInputDialog()
         }
@@ -207,18 +201,6 @@ class MainActivity : AppCompatActivity() {
         clear.setOnClickListener {
             receivedMessages.text = ""
 
-        }
-
-        btnSend.setOnClickListener {
-            if (fieldTopic.text.isBlank()){
-                fieldTopic.error = getString(R.string.topic_can_t_be_blank)
-            }else{
-                if (fieldMessage.text.isBlank()){
-                    fieldMessage.error = getString(R.string.message_can_t_be_blank)
-                }else{
-                    pubmsg(fieldTopic.text.toString(), fieldMessage.text.toString())
-                }
-            }
         }
     }
 }

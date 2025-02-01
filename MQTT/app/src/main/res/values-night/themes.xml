@@ -9,4 +9,15 @@
         <item name="android:textColor">@color/white</item>
         <item name="android:tint">@color/white</item>
     </style>
+
+    <style name="ButtonTheme">
+        <item name="android:backgroundTint">@color/primarydrk</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="PauseButtonTheme">
+        <item name="android:backgroundTint">@color/pausedrk</item>
+        <item name="tint">@color/white</item>
+        <item name="tintMode">src_in</item>
+    </style>
 </resources>

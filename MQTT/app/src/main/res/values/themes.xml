@@ -9,5 +9,16 @@
         <item name="android:textColor">@color/black</item>
         <item name="android:tint">@color/black</item>
     </style>
+
+    <style name="ButtonTheme">
+        <item name="android:backgroundTint">@color/primary</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="PauseButtonTheme">
+        <item name="android:backgroundTint">@color/pause</item>
+        <item name="tint">@color/black</item>
+        <item name="tintMode">src_in</item>
+    </style>
     <style name="Theme.MQTT" parent="Base.Theme.MQTT" />
 </resources>

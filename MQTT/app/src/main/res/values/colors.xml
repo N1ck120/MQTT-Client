@@ -6,4 +6,6 @@
     <color name="primarydrk">#64B5F6</color>
     <color name="secondary">#64B5F6</color>
     <color name="secondarydrk">#BBDEFB</color>
+    <color name="pause">#FF1744</color>
+    <color name="pausedrk">#FF5252</color>
 </resources>
