@@ -59,6 +59,16 @@
             app:srcCompat="@drawable/round_settings_24"
             tools:ignore="SpeakableTextPresentCheck" />
 
+        <ImageButton
+            android:id="@+id/refresh"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="#00000000"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/round_refresh_24"
+            tools:ignore="SpeakableTextPresentCheck"/>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -77,16 +87,6 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/subpayload"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginEnd="10dp"
-                    android:textColor="#FFFFFF"
-                    android:textIsSelectable="true"
-                    tools:ignore="SpeakableTextPresentCheck" />
-
                 <ProgressBar
                     android:id="@+id/progressBar"
                     style="?android:attr/progressBarStyle"
@@ -101,6 +101,16 @@
                     android:gravity="center"
                     android:text="@string/connecting"
                     android:textSize="20sp" />
+
+                <TextView
+                    android:id="@+id/subpayload"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:textColor="#FFFFFF"
+                    android:textIsSelectable="true"
+                    tools:ignore="SpeakableTextPresentCheck" />
 
                 <Space
                     android:layout_width="match_parent"

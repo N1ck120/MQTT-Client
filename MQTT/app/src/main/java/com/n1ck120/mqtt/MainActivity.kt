@@ -1,6 +1,5 @@
 package com.n1ck120.mqtt
 
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -16,7 +15,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.coroutines.runBlocking
 
 class MainActivity : AppCompatActivity() {
 
@@ -33,6 +34,7 @@ class MainActivity : AppCompatActivity() {
         SharedPreferencesManager.init(this)
         val btnSend = findViewById<Button>(R.id.button)
         val btnSettings = findViewById<ImageButton>(R.id.settings)
+        val btnRefresh = findViewById<ImageButton>(R.id.refresh)
         val clear = findViewById<FloatingActionButton>(R.id.clearbtn)
         val fieldMessage = findViewById<EditText>(R.id.msg)
         val fieldTopic = findViewById<EditText>(R.id.topic)
@@ -52,7 +54,8 @@ class MainActivity : AppCompatActivity() {
                     wait.visibility = View.GONE
                     progress.visibility = View.GONE
 
-                    Toast.makeText(this@MainActivity, "Conectado!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MainActivity,
+                        getString(R.string.connectedtoast)+" "+SharedPreferencesManager.getString("Server", "broker.hivemq.com").toString(), Toast.LENGTH_SHORT).show()
                     mqtt.subscribe(SharedPreferencesManager.getString("Topic", "TestClientMQTT").toString())
 
                     btnSend.setOnClickListener {
@@ -96,12 +99,21 @@ class MainActivity : AppCompatActivity() {
             override fun onPublishFailed(throwable: Throwable) {
                 //Toast.makeText(this@MainActivity, "Falha no envio da mensagem!", Toast.LENGTH_SHORT).show()
             }
-
-            // Implementar outros callbacks conforme necessário
-
         })
 
         mqtt.connect()
+
+        fun refrsh() = runBlocking{
+            mqtt.disconnect()
+            runOnUiThread{
+                btnSend.isEnabled = false
+                fieldTopic.isEnabled = false
+                fieldMessage.isEnabled = false
+                wait.visibility = View.VISIBLE
+                progress.visibility = View.VISIBLE
+            }
+            mqtt.connect()
+        }
 
         //Lógica do Botão pause
         fun updateButtonAppearance() {
@@ -132,6 +144,7 @@ class MainActivity : AppCompatActivity() {
             // Referências aos botões do layout
             val defaultsOption: Button = dialogView.findViewById(R.id.btnDefaults)
             val saveOption: Button = dialogView.findViewById(R.id.btnSave)
+            var changed : Boolean = false
 
             if (SharedPreferencesManager.keyExists("IdClient")){
                 inputField1.setText(SharedPreferencesManager.getString("IdClient").toString())
@@ -145,36 +158,52 @@ class MainActivity : AppCompatActivity() {
             if (SharedPreferencesManager.keyExists("Topic")){
                 inputField4.setText(SharedPreferencesManager.getString("Topic").toString())
             }
+            inputField1.doAfterTextChanged {
+                changed = true
+            }
+            inputField2.doAfterTextChanged {
+                changed = true
+            }
+            inputField3.doAfterTextChanged {
+                changed = true
+            }
+            inputField4.doAfterTextChanged {
+                changed = true
+            }
 
             // Configura os listeners dos botões
             saveOption.setOnClickListener {
                 // Captura os valores digitados
                 if (inputField1.text.isNotBlank()){
+
                     SharedPreferencesManager.saveString("IdClient", inputField1.text.toString())
                 }else{
                     SharedPreferencesManager.removeKey("IdClient")
                 }
                 if (inputField2.text.isNotBlank()){
+
                     SharedPreferencesManager.saveString("Server", inputField2.text.toString())
                 }else{
                     SharedPreferencesManager.removeKey("Server")
                 }
                 if (inputField3.text.isNotBlank()){
+
                     SharedPreferencesManager.saveString("Port", inputField3.text.toString())
                 }else{
                     SharedPreferencesManager.removeKey("Port")
                 }
                 if (inputField4.text.isNotBlank()){
+
                     SharedPreferencesManager.saveString("Topic", inputField4.text.toString())
                 }else{
                     SharedPreferencesManager.removeKey("Topic")
                 }
                 // Mostra as informações capturadas (ou faça algo com elas)
                 SharedPreferencesManager.saveString("popupAlreadyShown", "1")
+                if (changed == true){
+                    refrsh()
+                }
                 Toast.makeText(this, getString(R.string.saved), Toast.LENGTH_SHORT).show()
-                val intent = intent // Recupera o Intent atual
-                finish() // Finaliza a Activity
-                startActivity(intent) // Inicia uma nova instância da mesma Activity
                 dialog.dismiss()
             }
 
@@ -182,9 +211,7 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, getString(R.string.using_default_values), Toast.LENGTH_SHORT).show()
                 SharedPreferencesManager.clearAllData()
                 SharedPreferencesManager.saveString("popupAlreadyShown", "1")
-                val intent = intent // Recupera o Intent atual
-                finish() // Finaliza a Activity
-                startActivity(intent) // Inicia uma nova instância da mesma Activity
+                refrsh()
                 dialog.dismiss()
             }
             dialog.show()
@@ -196,6 +223,10 @@ class MainActivity : AppCompatActivity() {
 
         btnSettings.setOnClickListener {
             showInputDialog()
+        }
+
+        btnRefresh.setOnClickListener {
+            refrsh()
         }
 
         clear.setOnClickListener {

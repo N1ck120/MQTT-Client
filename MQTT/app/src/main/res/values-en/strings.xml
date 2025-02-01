@@ -17,4 +17,5 @@
     <string name="connection_settings">Connection Settings</string>
     <string name="connection_settings_message">Leave blank to use default values</string>
     <string name="connecting">Connecting to MQTT, please wait…</string>
+    <string name="connectedtoast">Connected with</string>
 </resources>
