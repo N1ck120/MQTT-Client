@@ -7,6 +7,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ProgressBar
+import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -17,6 +18,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 
 class MainActivity : AppCompatActivity() {
@@ -30,6 +32,7 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
 
         SharedPreferencesManager.init(this)
         val btnSend = findViewById<Button>(R.id.button)
@@ -76,10 +79,11 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this@MainActivity, "Falha na conexão!", Toast.LENGTH_SHORT).show()
             }
 
-            override fun onMessageReceived(topic: String, payload: String) {
+            override fun onMessageReceived(topic: String, payload: String) = runBlocking{
+                delay(1000*(SharedPreferencesManager.getString("Delay","0").toString().toLong()))
                 runOnUiThread {
                     if (isToggled){
-                        receivedMessages.text = payload + "\n" + receivedMessages.text
+                        receivedMessages.text = payload //+ "\n" + receivedMessages.text
                     }
                 }
             }
@@ -140,11 +144,36 @@ class MainActivity : AppCompatActivity() {
             val inputField2: EditText = dialogView.findViewById(R.id.inputField2)
             val inputField3: EditText = dialogView.findViewById(R.id.inputField3)
             val inputField4: EditText = dialogView.findViewById(R.id.inputField4)
+            val delayValue : SeekBar = dialogView.findViewById(R.id.seekBar)
+
+            val delayText: TextView = dialogView.findViewById(R.id.delayvalue)
 
             // Referências aos botões do layout
             val defaultsOption: Button = dialogView.findViewById(R.id.btnDefaults)
             val saveOption: Button = dialogView.findViewById(R.id.btnSave)
             var changed : Boolean = false
+
+            if (SharedPreferencesManager.keyExists("Delay")){
+                delayValue.progress = SharedPreferencesManager.getString("Delay").toString().toInt()
+                delayText.text = "Delay: "+SharedPreferencesManager.getString("Delay").toString()+"s"
+            }
+
+            delayValue.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+                    // Atualiza a interface com o novo valor
+                    delayText.text = "Delay: $progress"+"s"
+                    SharedPreferencesManager.saveString("Delay", delayValue.progress.toString())
+                }
+
+                override fun onStartTrackingTouch(seekBar: SeekBar) {
+                    // Opcional: ações quando o usuário começa a interagir com a SeekBar
+                }
+
+                override fun onStopTrackingTouch(seekBar: SeekBar) {
+                    // Opcional: ações quando o usuário para de interagir com a SeekBar
+                }
+            })
+
 
             if (SharedPreferencesManager.keyExists("IdClient")){
                 inputField1.setText(SharedPreferencesManager.getString("IdClient").toString())
@@ -158,6 +187,7 @@ class MainActivity : AppCompatActivity() {
             if (SharedPreferencesManager.keyExists("Topic")){
                 inputField4.setText(SharedPreferencesManager.getString("Topic").toString())
             }
+
             inputField1.doAfterTextChanged {
                 changed = true
             }
@@ -175,25 +205,21 @@ class MainActivity : AppCompatActivity() {
             saveOption.setOnClickListener {
                 // Captura os valores digitados
                 if (inputField1.text.isNotBlank()){
-
                     SharedPreferencesManager.saveString("IdClient", inputField1.text.toString())
                 }else{
                     SharedPreferencesManager.removeKey("IdClient")
                 }
                 if (inputField2.text.isNotBlank()){
-
                     SharedPreferencesManager.saveString("Server", inputField2.text.toString())
                 }else{
                     SharedPreferencesManager.removeKey("Server")
                 }
                 if (inputField3.text.isNotBlank()){
-
                     SharedPreferencesManager.saveString("Port", inputField3.text.toString())
                 }else{
                     SharedPreferencesManager.removeKey("Port")
                 }
                 if (inputField4.text.isNotBlank()){
-
                     SharedPreferencesManager.saveString("Topic", inputField4.text.toString())
                 }else{
                     SharedPreferencesManager.removeKey("Topic")
