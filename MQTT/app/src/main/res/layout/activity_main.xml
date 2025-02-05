@@ -114,7 +114,7 @@
 
                 <Space
                     android:layout_width="match_parent"
-                    android:layout_height="55dp" />
+                    android:layout_height="65dp" />
 
             </LinearLayout>
 
@@ -144,7 +144,7 @@
             style="@style/PauseButtonTheme"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:srcCompat="@drawable/round_play_circle_outline_24" />
+            app:srcCompat="@drawable/rounded_pause_circle_24" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

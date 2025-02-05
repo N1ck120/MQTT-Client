@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ProgressBar
@@ -45,7 +46,7 @@ class MainActivity : AppCompatActivity() {
         val receivedMessages = findViewById<TextView>(R.id.subpayload)
         val wait = findViewById<TextView>(R.id.wait)
         val progress = findViewById<ProgressBar>(R.id.progressBar)
-        var isToggled = false
+        var isToggled = true
 
         val mqtt = MQTTConnection(SharedPreferencesManager.getString("IdClient", "ClientMQTT").toString(), SharedPreferencesManager.getString("Server", "broker.hivemq.com").toString(), SharedPreferencesManager.getString("Port", "1883").toString().toInt())
         mqtt.setCallbacks(object : MQTTConnection.MQTTCallbacks {
@@ -83,7 +84,11 @@ class MainActivity : AppCompatActivity() {
                 delay(1000*(SharedPreferencesManager.getString("Delay","0").toString().toLong()))
                 runOnUiThread {
                     if (isToggled){
-                        receivedMessages.text = payload //+ "\n" + receivedMessages.text
+                        if (SharedPreferencesManager.getString("KeepHistory","true").toBoolean()){
+                            receivedMessages.text = payload + "\n" + receivedMessages.text
+                        }else{
+                            receivedMessages.text = payload
+                        }
                     }
                 }
             }
@@ -145,8 +150,8 @@ class MainActivity : AppCompatActivity() {
             val inputField3: EditText = dialogView.findViewById(R.id.inputField3)
             val inputField4: EditText = dialogView.findViewById(R.id.inputField4)
             val delayValue : SeekBar = dialogView.findViewById(R.id.seekBar)
-
             val delayText: TextView = dialogView.findViewById(R.id.delayvalue)
+            val keepHistory: CheckBox = dialogView.findViewById(R.id.checkBox)
 
             // Referências aos botões do layout
             val defaultsOption: Button = dialogView.findViewById(R.id.btnDefaults)
@@ -158,11 +163,14 @@ class MainActivity : AppCompatActivity() {
                 delayText.text = "Delay: "+SharedPreferencesManager.getString("Delay").toString()+"s"
             }
 
+            if (SharedPreferencesManager.keyExists("KeepHistory")){
+                keepHistory.isChecked = SharedPreferencesManager.getString("KeepHistory").toBoolean()
+            }
+
             delayValue.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                     // Atualiza a interface com o novo valor
                     delayText.text = "Delay: $progress"+"s"
-                    SharedPreferencesManager.saveString("Delay", delayValue.progress.toString())
                 }
 
                 override fun onStartTrackingTouch(seekBar: SeekBar) {
@@ -224,6 +232,14 @@ class MainActivity : AppCompatActivity() {
                 }else{
                     SharedPreferencesManager.removeKey("Topic")
                 }
+                SharedPreferencesManager.saveString("Delay", delayValue.progress.toString())
+                if (keepHistory.isChecked) {
+                    SharedPreferencesManager.saveString("Keep", "1")
+                }else{
+                    SharedPreferencesManager.saveString("Keep", "0")
+                }
+                SharedPreferencesManager.saveString("KeepHistory", keepHistory.isChecked.toString())
+
                 // Mostra as informações capturadas (ou faça algo com elas)
                 SharedPreferencesManager.saveString("popupAlreadyShown", "1")
                 if (changed == true){

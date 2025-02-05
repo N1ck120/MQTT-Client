@@ -18,4 +18,5 @@
     <string name="connection_settings_message">Deixe vazio para usar os valores padrão</string>
     <string name="connecting">Conectando ao MQTT, por favor aguarde…</string>
     <string name="connectedtoast">Conectado com</string>
+    <string name="keepHistory">Manter histórico (Evite ativar quando a quantia de mensagens recebidas por segundo é muito alta)</string>
 </resources>
