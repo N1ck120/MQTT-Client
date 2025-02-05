@@ -8,6 +8,7 @@
         <item name="android:windowBackground">#212121</item>
         <item name="android:textColor">@color/white</item>
         <item name="android:tint">@color/white</item>
+        <item name="android:textColorHighlight">@color/primarydrk</item>
     </style>
 
     <style name="ButtonTheme">
@@ -19,5 +20,9 @@
         <item name="android:backgroundTint">@color/pausedrk</item>
         <item name="tint">@color/white</item>
         <item name="tintMode">src_in</item>
+    </style>
+
+    <style name="Payload">
+        <item name="android:background">@color/black</item>
     </style>
 </resources>

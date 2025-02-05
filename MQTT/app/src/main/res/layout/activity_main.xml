@@ -79,7 +79,7 @@
             android:id="@+id/scrollView2"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/black"
+            style="@style/Payload"
             tools:layout_editor_absoluteY="56dp">
 
             <LinearLayout
@@ -99,6 +99,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center"
+                    android:textColor="@color/white"
                     android:text="@string/connecting"
                     android:textSize="20sp" />
 
