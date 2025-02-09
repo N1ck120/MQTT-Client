@@ -2,11 +2,8 @@ package com.n1ck120.mqtt
 
 import android.content.Context
 import android.net.ConnectivityManager
-import android.net.LinkProperties
-import android.net.Network
 import android.net.NetworkCapabilities
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
@@ -42,51 +39,53 @@ class MainActivity : AppCompatActivity() {
         }
 
         SharedPreferencesManager.init(this)
-        val btnSend = findViewById<Button>(R.id.button)
         val btnReconnect = findViewById<Button>(R.id.reconnect)
-        val btnSettings = findViewById<ImageButton>(R.id.settings)
         val btnRefresh = findViewById<ImageButton>(R.id.refresh)
+        val btnSend = findViewById<Button>(R.id.button)
+        val btnSettings = findViewById<ImageButton>(R.id.settings)
         val clear = findViewById<FloatingActionButton>(R.id.clearbtn)
         val fieldMessage = findViewById<EditText>(R.id.msg)
         val fieldTopic = findViewById<EditText>(R.id.topic)
+        var isToggled = true
         val pause = findViewById<FloatingActionButton>(R.id.pausebtn)
         val receivedMessages = findViewById<TextView>(R.id.subpayload)
-        val wait = findViewById<TextView>(R.id.wait)
-        val progress = findViewById<ProgressBar>(R.id.progressBar)
-        var isToggled = true
-        val interneticon = findViewById<ImageView>(R.id.imageView)
-        val internettext = findViewById<TextView>(R.id.nointernet)
 
         fun disableComponents(status : String){
-            if (status == "online"){
-                wait.visibility = View.GONE
-                progress.visibility = View.GONE
-                interneticon.visibility = View.GONE
-                internettext.visibility = View.GONE
-                btnSend.isEnabled = true
-                fieldTopic.isEnabled = true
-                fieldMessage.isEnabled = true
-                btnReconnect.visibility = View.GONE
-            }
-            if(status == "reloading"){
-                wait.visibility = View.VISIBLE
-                progress.visibility = View.VISIBLE
-                interneticon.visibility = View.GONE
-                internettext.visibility = View.GONE
-                btnSend.isEnabled = false
-                fieldTopic.isEnabled = false
-                fieldMessage.isEnabled = false
-                btnReconnect.visibility = View.GONE
-            }
-            if(status == "offline"){
-                wait.visibility = View.GONE
-                progress.visibility = View.GONE
-                interneticon.visibility = View.VISIBLE
-                internettext.visibility = View.VISIBLE
-                btnSend.isEnabled = false
-                fieldTopic.isEnabled = false
-                fieldMessage.isEnabled = false
-                btnReconnect.visibility = View.VISIBLE
+            val noInternetIcon = findViewById<ImageView>(R.id.imageView)
+            val noInternetText = findViewById<TextView>(R.id.nointernet)
+            val progress = findViewById<ProgressBar>(R.id.progressBar)
+            val wait = findViewById<TextView>(R.id.wait)
+            when(status){
+                "online" -> {
+                    wait.visibility = View.GONE
+                    progress.visibility = View.GONE
+                    noInternetIcon.visibility = View.GONE
+                    noInternetText.visibility = View.GONE
+                    btnSend.isEnabled = true
+                    fieldTopic.isEnabled = true
+                    fieldMessage.isEnabled = true
+                    btnReconnect.visibility = View.GONE
+                }
+                "reloading" -> {
+                    wait.visibility = View.VISIBLE
+                    progress.visibility = View.VISIBLE
+                    noInternetIcon.visibility = View.GONE
+                    noInternetText.visibility = View.GONE
+                    btnSend.isEnabled = false
+                    fieldTopic.isEnabled = false
+                    fieldMessage.isEnabled = false
+                    btnReconnect.visibility = View.GONE
+                }
+                "offline" -> {
+                    wait.visibility = View.GONE
+                    progress.visibility = View.GONE
+                    noInternetIcon.visibility = View.VISIBLE
+                    noInternetText.visibility = View.VISIBLE
+                    btnSend.isEnabled = false
+                    fieldTopic.isEnabled = false
+                    fieldMessage.isEnabled = false
+                    btnReconnect.visibility = View.VISIBLE
+                }
             }
         }
 
@@ -120,59 +119,34 @@ class MainActivity : AppCompatActivity() {
                                 if (isOnline(this@MainActivity)){
                                     mqtt.publish(fieldTopic.text.toString(), fieldMessage.text.toString())
                                 }else{
-                                    interneticon.visibility = View.VISIBLE
-                                    internettext.visibility = View.VISIBLE
-                                    btnSend.isEnabled = false
-                                    fieldTopic.isEnabled = false
-                                    fieldMessage.isEnabled = false
+                                    disableComponents("offline")
                                 }
                             }
                         }
                     }
                 }
             }
-
             override fun onConnectionFailed(throwable: Throwable) {
-                Toast.makeText(this@MainActivity, "Falha na conexão!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@MainActivity, "Falha na conexão! Erro: ${throwable.javaClass.simpleName} - ${throwable.message ?: "Sem detalhes"}", Toast.LENGTH_SHORT).show()
             }
-
             override fun onMessageReceived(topic: String, payload: String) = runBlocking{
                 delay(1000*(SharedPreferencesManager.getString("Delay","0").toString().toLong()))
                 runOnUiThread {
                     if (isToggled){
                         if (SharedPreferencesManager.getString("KeepHistory","true").toBoolean()){
-                            receivedMessages.text = payload + "\n" + receivedMessages.text
+                            receivedMessages.text = payload + System.lineSeparator() + receivedMessages.text
                         }else{
                             receivedMessages.text = payload
                         }
                     }
                 }
             }
-
-            override fun onSubscribed() {
-                //Toast.makeText(this@MainActivity, "Inscrito com sucesso!", Toast.LENGTH_SHORT).show()
-            }
-
-            override fun onSubscribeFailed(throwable: Throwable) {
-                //Toast.makeText(this@MainActivity, "Falha na inscrição!", Toast.LENGTH_SHORT).show()
-            }
-
-            override fun onMessagePublished() {
-                //Toast.makeText(this@MainActivity, "Mensagem enviada!", Toast.LENGTH_SHORT).show()
-            }
-
-            override fun onPublishFailed(throwable: Throwable) {
-                //Toast.makeText(this@MainActivity, "Falha no envio da mensagem!", Toast.LENGTH_SHORT).show()
-            }
+            //Callbacks não implementados
+            override fun onSubscribed() {}
+            override fun onSubscribeFailed(throwable: Throwable) {}
+            override fun onMessagePublished() {}
+            override fun onPublishFailed(throwable: Throwable) {}
         })
-
-        if (isOnline(this)){
-            disableComponents("online")
-            mqtt.connect()
-        }else{
-            disableComponents("offline")
-        }
-
 
         fun refrsh() = runBlocking{
             mqtt.disconnect()
@@ -195,11 +169,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        pause.setOnClickListener {
-            isToggled = !isToggled
-            updateButtonAppearance()
-        }
-
         fun showInputDialog() {
             val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_input, null)
             val dialog = AlertDialog.Builder(this)
@@ -218,7 +187,7 @@ class MainActivity : AppCompatActivity() {
             // Referências aos botões do layout
             val defaultsOption: Button = dialogView.findViewById(R.id.btnDefaults)
             val saveOption: Button = dialogView.findViewById(R.id.btnSave)
-            var changed : Boolean = false
+            var changed = false
 
             if (SharedPreferencesManager.keyExists("Delay")){
                 delayValue.progress = SharedPreferencesManager.getString("Delay").toString().toInt()
@@ -234,14 +203,9 @@ class MainActivity : AppCompatActivity() {
                     // Atualiza a interface com o novo valor
                     delayText.text = "Delay: $progress"+"s"
                 }
-
-                override fun onStartTrackingTouch(seekBar: SeekBar) {
-                    // Opcional: ações quando o usuário começa a interagir com a SeekBar
-                }
-
-                override fun onStopTrackingTouch(seekBar: SeekBar) {
-                    // Opcional: ações quando o usuário para de interagir com a SeekBar
-                }
+                //Listeners não implementados
+                override fun onStartTrackingTouch(seekBar: SeekBar) {}
+                override fun onStopTrackingTouch(seekBar: SeekBar) {}
             })
 
             if (SharedPreferencesManager.keyExists("IdClient")){
@@ -303,7 +267,7 @@ class MainActivity : AppCompatActivity() {
 
                 // Mostra as informações capturadas (ou faça algo com elas)
                 SharedPreferencesManager.saveString("popupAlreadyShown", "1")
-                if (changed == true){
+                if (changed){
                     refrsh()
                 }
                 if (!isOnline(this)){
@@ -323,8 +287,20 @@ class MainActivity : AppCompatActivity() {
             dialog.show()
         }
 
+        if (isOnline(this)){
+            disableComponents("online")
+            mqtt.connect()
+        }else{
+            disableComponents("offline")
+        }
+
         if (!SharedPreferencesManager.keyExists("popupAlreadyShown")){
             showInputDialog()
+        }
+
+        pause.setOnClickListener {
+            isToggled = !isToggled
+            updateButtonAppearance()
         }
 
         btnSettings.setOnClickListener {
@@ -344,8 +320,3 @@ class MainActivity : AppCompatActivity() {
         }
     }
 }
-
-
-
-
-
