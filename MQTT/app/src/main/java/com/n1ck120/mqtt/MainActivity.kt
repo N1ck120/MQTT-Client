@@ -1,12 +1,19 @@
 package com.n1ck120.mqtt
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.LinkProperties
+import android.net.Network
+import android.net.NetworkCapabilities
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.SeekBar
 import android.widget.TextView
@@ -34,7 +41,6 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-
         SharedPreferencesManager.init(this)
         val btnSend = findViewById<Button>(R.id.button)
         val btnSettings = findViewById<ImageButton>(R.id.settings)
@@ -47,6 +53,22 @@ class MainActivity : AppCompatActivity() {
         val wait = findViewById<TextView>(R.id.wait)
         val progress = findViewById<ProgressBar>(R.id.progressBar)
         var isToggled = true
+        val interneticon = findViewById<ImageView>(R.id.imageView)
+        val internettext = findViewById<TextView>(R.id.nointernet)
+
+
+        fun isOnline(context: Context): Boolean {
+            val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            // Obtém a rede ativa; se não houver rede, retorna false
+            val network = connectivityManager.activeNetwork ?: return false
+            // Obtém as capacidades da rede ativa
+            val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
+            // Verifica se a rede possui a capacidade de acessar a internet e, opcionalmente, se está validada
+            return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+                    capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+        }
+
+
 
         val mqtt = MQTTConnection(SharedPreferencesManager.getString("IdClient", "ClientMQTT").toString(), SharedPreferencesManager.getString("Server", "broker.hivemq.com").toString(), SharedPreferencesManager.getString("Port", "1883").toString().toInt())
         mqtt.setCallbacks(object : MQTTConnection.MQTTCallbacks {
@@ -110,18 +132,35 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        mqtt.connect()
+        if (isOnline(this)){
+            mqtt.connect()
+            interneticon.visibility = View.GONE
+            internettext.visibility = View.GONE
+        }else{
+            wait.visibility = View.GONE
+            progress.visibility = View.GONE
+            interneticon.visibility = View.VISIBLE
+            internettext.visibility = View.VISIBLE
+        }
+
 
         fun refrsh() = runBlocking{
             mqtt.disconnect()
-            runOnUiThread{
-                btnSend.isEnabled = false
-                fieldTopic.isEnabled = false
-                fieldMessage.isEnabled = false
-                wait.visibility = View.VISIBLE
-                progress.visibility = View.VISIBLE
+            if (isOnline(this@MainActivity)){
+                runOnUiThread{
+                    btnSend.isEnabled = false
+                    fieldTopic.isEnabled = false
+                    fieldMessage.isEnabled = false
+                    interneticon.visibility = View.GONE
+                    internettext.visibility = View.GONE
+                    wait.visibility = View.VISIBLE
+                    progress.visibility = View.VISIBLE
+                }
+                mqtt.connect()
+            }else{
+                interneticon.visibility = View.VISIBLE
+                internettext.visibility = View.VISIBLE
             }
-            mqtt.connect()
         }
 
         //Lógica do Botão pause

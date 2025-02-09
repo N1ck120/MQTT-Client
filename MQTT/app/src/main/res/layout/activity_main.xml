@@ -103,6 +103,23 @@
                     android:text="@string/connecting"
                     android:textSize="20sp" />
 
+                <ImageView
+                    android:id="@+id/imageView"
+                    android:layout_width="match_parent"
+                    android:layout_height="85dp"
+                    android:visibility="gone"
+                    app:srcCompat="@drawable/round_wifi_off_24" />
+
+                <TextView
+                    android:id="@+id/nointernet"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:visibility="gone"
+                    android:text="Não foi possivel estabelecer conexão!"
+                    android:textColor="@color/white"
+                    android:textSize="20sp" />
+
                 <TextView
                     android:id="@+id/subpayload"
                     android:layout_width="match_parent"
