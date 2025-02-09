@@ -90,8 +90,9 @@
                 <ProgressBar
                     android:id="@+id/progressBar"
                     style="?android:attr/progressBarStyle"
-                    android:layout_width="55dp"
-                    android:layout_height="55dp"
+                    android:layout_width="65dp"
+                    android:layout_height="65dp"
+                    android:layout_margin="10dp"
                     android:layout_gravity="center" />
 
                 <TextView
@@ -99,16 +100,19 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center"
+                    android:layout_marginBottom="10dp"
                     android:textColor="@color/white"
                     android:text="@string/connecting"
-                    android:textSize="20sp" />
+                    android:textSize="18sp" />
 
                 <ImageView
                     android:id="@+id/imageView"
                     android:layout_width="match_parent"
-                    android:layout_height="85dp"
+                    android:layout_height="65dp"
                     android:visibility="gone"
-                    app:srcCompat="@drawable/round_wifi_off_24" />
+                    android:layout_margin="10dp"
+                    app:srcCompat="@drawable/round_wifi_off_24"
+                    app:tint="@color/white" />
 
                 <TextView
                     android:id="@+id/nointernet"
@@ -116,9 +120,19 @@
                     android:layout_height="match_parent"
                     android:gravity="center"
                     android:visibility="gone"
-                    android:text="Não foi possivel estabelecer conexão!"
+                    android:layout_marginBottom="10dp"
                     android:textColor="@color/white"
-                    android:textSize="20sp" />
+                    android:text="@string/offlineText"
+                    android:textSize="18sp" />
+
+                <Button
+                    android:id="@+id/reconnect"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:visibility="gone"
+                    style="@style/ButtonTheme"
+                    android:text="@string/reconnect" />
 
                 <TextView
                     android:id="@+id/subpayload"

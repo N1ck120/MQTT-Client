@@ -19,4 +19,6 @@
     <string name="connecting">Conectando ao MQTT, por favor aguarde…</string>
     <string name="connectedtoast">Conectado com</string>
     <string name="keepHistory">Manter histórico (Evite ativar quando a quantia de mensagens recebidas por segundo é muito alta)</string>
+    <string name="offlineText">Não foi possivel conectar! Verifique sua conexão com a internet e tente novamente.</string>
+    <string name="reconnect">Tentar novamente</string>
 </resources>

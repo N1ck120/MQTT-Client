@@ -43,6 +43,7 @@ class MainActivity : AppCompatActivity() {
 
         SharedPreferencesManager.init(this)
         val btnSend = findViewById<Button>(R.id.button)
+        val btnReconnect = findViewById<Button>(R.id.reconnect)
         val btnSettings = findViewById<ImageButton>(R.id.settings)
         val btnRefresh = findViewById<ImageButton>(R.id.refresh)
         val clear = findViewById<FloatingActionButton>(R.id.clearbtn)
@@ -56,6 +57,38 @@ class MainActivity : AppCompatActivity() {
         val interneticon = findViewById<ImageView>(R.id.imageView)
         val internettext = findViewById<TextView>(R.id.nointernet)
 
+        fun disableComponents(status : String){
+            if (status == "online"){
+                wait.visibility = View.GONE
+                progress.visibility = View.GONE
+                interneticon.visibility = View.GONE
+                internettext.visibility = View.GONE
+                btnSend.isEnabled = true
+                fieldTopic.isEnabled = true
+                fieldMessage.isEnabled = true
+                btnReconnect.visibility = View.GONE
+            }
+            if(status == "reloading"){
+                wait.visibility = View.VISIBLE
+                progress.visibility = View.VISIBLE
+                interneticon.visibility = View.GONE
+                internettext.visibility = View.GONE
+                btnSend.isEnabled = false
+                fieldTopic.isEnabled = false
+                fieldMessage.isEnabled = false
+                btnReconnect.visibility = View.GONE
+            }
+            if(status == "offline"){
+                wait.visibility = View.GONE
+                progress.visibility = View.GONE
+                interneticon.visibility = View.VISIBLE
+                internettext.visibility = View.VISIBLE
+                btnSend.isEnabled = false
+                fieldTopic.isEnabled = false
+                fieldMessage.isEnabled = false
+                btnReconnect.visibility = View.VISIBLE
+            }
+        }
 
         fun isOnline(context: Context): Boolean {
             val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -68,18 +101,11 @@ class MainActivity : AppCompatActivity() {
                     capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
         }
 
-
-
         val mqtt = MQTTConnection(SharedPreferencesManager.getString("IdClient", "ClientMQTT").toString(), SharedPreferencesManager.getString("Server", "broker.hivemq.com").toString(), SharedPreferencesManager.getString("Port", "1883").toString().toInt())
         mqtt.setCallbacks(object : MQTTConnection.MQTTCallbacks {
             override fun onConnected() {
                 runOnUiThread {
-                    btnSend.isEnabled = true
-                    fieldTopic.isEnabled = true
-                    fieldMessage.isEnabled = true
-                    wait.visibility = View.GONE
-                    progress.visibility = View.GONE
-
+                    disableComponents("online")
                     Toast.makeText(this@MainActivity,
                         getString(R.string.connectedtoast)+" "+SharedPreferencesManager.getString("Server", "broker.hivemq.com").toString(), Toast.LENGTH_SHORT).show()
                     mqtt.subscribe(SharedPreferencesManager.getString("Topic", "TestClientMQTT").toString())
@@ -91,7 +117,15 @@ class MainActivity : AppCompatActivity() {
                             if (fieldMessage.text.isBlank()){
                                 fieldMessage.error = getString(R.string.message_can_t_be_blank)
                             }else{
-                                mqtt.publish(fieldTopic.text.toString(), fieldMessage.text.toString())
+                                if (isOnline(this@MainActivity)){
+                                    mqtt.publish(fieldTopic.text.toString(), fieldMessage.text.toString())
+                                }else{
+                                    interneticon.visibility = View.VISIBLE
+                                    internettext.visibility = View.VISIBLE
+                                    btnSend.isEnabled = false
+                                    fieldTopic.isEnabled = false
+                                    fieldMessage.isEnabled = false
+                                }
                             }
                         }
                     }
@@ -133,14 +167,10 @@ class MainActivity : AppCompatActivity() {
         })
 
         if (isOnline(this)){
+            disableComponents("online")
             mqtt.connect()
-            interneticon.visibility = View.GONE
-            internettext.visibility = View.GONE
         }else{
-            wait.visibility = View.GONE
-            progress.visibility = View.GONE
-            interneticon.visibility = View.VISIBLE
-            internettext.visibility = View.VISIBLE
+            disableComponents("offline")
         }
 
 
@@ -148,18 +178,11 @@ class MainActivity : AppCompatActivity() {
             mqtt.disconnect()
             if (isOnline(this@MainActivity)){
                 runOnUiThread{
-                    btnSend.isEnabled = false
-                    fieldTopic.isEnabled = false
-                    fieldMessage.isEnabled = false
-                    interneticon.visibility = View.GONE
-                    internettext.visibility = View.GONE
-                    wait.visibility = View.VISIBLE
-                    progress.visibility = View.VISIBLE
+                    disableComponents("reloading")
                 }
                 mqtt.connect()
             }else{
-                interneticon.visibility = View.VISIBLE
-                internettext.visibility = View.VISIBLE
+                disableComponents("offline")
             }
         }
 
@@ -220,7 +243,6 @@ class MainActivity : AppCompatActivity() {
                     // Opcional: ações quando o usuário para de interagir com a SeekBar
                 }
             })
-
 
             if (SharedPreferencesManager.keyExists("IdClient")){
                 inputField1.setText(SharedPreferencesManager.getString("IdClient").toString())
@@ -284,6 +306,9 @@ class MainActivity : AppCompatActivity() {
                 if (changed == true){
                     refrsh()
                 }
+                if (!isOnline(this)){
+                    disableComponents("offline")
+                }
                 Toast.makeText(this, getString(R.string.saved), Toast.LENGTH_SHORT).show()
                 dialog.dismiss()
             }
@@ -306,13 +331,16 @@ class MainActivity : AppCompatActivity() {
             showInputDialog()
         }
 
+        btnReconnect.setOnClickListener {
+            refrsh()
+        }
+
         btnRefresh.setOnClickListener {
             refrsh()
         }
 
         clear.setOnClickListener {
             receivedMessages.text = ""
-
         }
     }
 }
