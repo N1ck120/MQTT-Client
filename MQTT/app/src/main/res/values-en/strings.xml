@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">MQTT</string>
-    <string name="config_dialog_id">Default ID: ClientMQTT</string>
     <string name="config_dialog_server">Default Server: broker.hivemq.com</string>
     <string name="config_dialog_port">Default Port: 1883</string>
     <string name="config_dialog_topic">Default Topic: TestClientMQTT</string>
@@ -21,4 +20,6 @@
     <string name="keepHistory">Keep History (Avoid enabling when the number of messages received per second is too high)</string>
     <string name="offlineText">Unable to connect! Please check your internet connection and try again.</string>
     <string name="reconnect">Try again</string>
+    <string name="generated_clientid">Generated ClientID</string>
+    <string name="generatingIdToast">Generating a new ID</string>
 </resources>

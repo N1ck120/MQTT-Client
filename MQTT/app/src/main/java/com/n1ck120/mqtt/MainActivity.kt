@@ -25,6 +25,7 @@ import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import java.util.UUID
 
 class MainActivity : AppCompatActivity() {
 
@@ -100,7 +101,7 @@ class MainActivity : AppCompatActivity() {
                     capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
         }
 
-        val mqtt = MQTTConnection(SharedPreferencesManager.getString("IdClient", "ClientMQTT").toString(), SharedPreferencesManager.getString("Server", "broker.hivemq.com").toString(), SharedPreferencesManager.getString("Port", "1883").toString().toInt())
+        val mqtt = MQTTConnection(SharedPreferencesManager.getString("IdClient").toString(), SharedPreferencesManager.getString("Server", "broker.hivemq.com").toString(), SharedPreferencesManager.getString("Port", "1883").toString().toInt())
         mqtt.setCallbacks(object : MQTTConnection.MQTTCallbacks {
             override fun onConnected() {
                 runOnUiThread {
@@ -176,7 +177,8 @@ class MainActivity : AppCompatActivity() {
                 .create() // Cria o diálogo sem botões padrão
 
             // Referências às caixas de texto no layout
-            val inputField1: EditText = dialogView.findViewById(R.id.inputField1)
+            val regenerateId: ImageButton = dialogView.findViewById(R.id.regenerateuuid)
+            val clientId: TextView = dialogView.findViewById(R.id.textView)
             val inputField2: EditText = dialogView.findViewById(R.id.inputField2)
             val inputField3: EditText = dialogView.findViewById(R.id.inputField3)
             val inputField4: EditText = dialogView.findViewById(R.id.inputField4)
@@ -188,6 +190,12 @@ class MainActivity : AppCompatActivity() {
             val defaultsOption: Button = dialogView.findViewById(R.id.btnDefaults)
             val saveOption: Button = dialogView.findViewById(R.id.btnSave)
             var changed = false
+
+            regenerateId.setOnClickListener{
+                Toast.makeText(this, getString(R.string.generatingIdToast), Toast.LENGTH_SHORT).show()
+                SharedPreferencesManager.saveString("IdClient", UUID.randomUUID().toString())
+                clientId.text = (SharedPreferencesManager.getString("IdClient").toString())
+            }
 
             if (SharedPreferencesManager.keyExists("Delay")){
                 delayValue.progress = SharedPreferencesManager.getString("Delay").toString().toInt()
@@ -208,9 +216,9 @@ class MainActivity : AppCompatActivity() {
                 override fun onStopTrackingTouch(seekBar: SeekBar) {}
             })
 
-            if (SharedPreferencesManager.keyExists("IdClient")){
-                inputField1.setText(SharedPreferencesManager.getString("IdClient").toString())
-            }
+            clientId.setSelected(true)
+            clientId.text = (SharedPreferencesManager.getString("IdClient").toString())
+
             if (SharedPreferencesManager.keyExists("Server")){
                 inputField2.setText(SharedPreferencesManager.getString("Server").toString())
             }
@@ -221,9 +229,6 @@ class MainActivity : AppCompatActivity() {
                 inputField4.setText(SharedPreferencesManager.getString("Topic").toString())
             }
 
-            inputField1.doAfterTextChanged {
-                changed = true
-            }
             inputField2.doAfterTextChanged {
                 changed = true
             }
@@ -237,11 +242,6 @@ class MainActivity : AppCompatActivity() {
             // Configura os listeners dos botões
             saveOption.setOnClickListener {
                 // Captura os valores digitados
-                if (inputField1.text.isNotBlank()){
-                    SharedPreferencesManager.saveString("IdClient", inputField1.text.toString())
-                }else{
-                    SharedPreferencesManager.removeKey("IdClient")
-                }
                 if (inputField2.text.isNotBlank()){
                     SharedPreferencesManager.saveString("Server", inputField2.text.toString())
                 }else{
@@ -285,6 +285,10 @@ class MainActivity : AppCompatActivity() {
                 dialog.dismiss()
             }
             dialog.show()
+        }
+
+        if (!SharedPreferencesManager.keyExists("IdClient")){
+            SharedPreferencesManager.saveString("IdClient", UUID.randomUUID().toString())
         }
 
         if (isOnline(this)){
